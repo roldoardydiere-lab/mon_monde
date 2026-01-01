@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+
+<div class="chat-container">
+
+    <div class="header">
+        💬 Chat – {{ username }}
+    </div>
+
+    <div class="messages" id="messages">
+        {% for msg in messages %}
+        <div class="message {% if msg.username == username %}me{% else %}other{% endif %}">
+            <div class="username">{{ msg.username }}</div>
+            {{ msg.text }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="input-area">
+        <input id="message" placeholder="Écris un message">
+        <button onclick="sendMessage()">➤</button>
+    </div>
+
+</div>
+
+<script>
+    const socket = io();
+    const username = "{{ username }}";
+
+    socket.on("receive_message", function(msg) {
+        const div = document.createElement("div");
+        div.className = "message " + (msg.username === username ? "me" : "other");
+
+        const name = document.createElement("div");
+        name.className = "username";
+        name.textContent = msg.username;
+
+        div.appendChild(name);
+        div.appendChild(document.createTextNode(msg.text));
+
+        document.getElementById("messages").appendChild(div);
+    });
+
+    function sendMessage() {
+        const input = document.getElementById("message");
+        socket.emit("send_message", {
+            username: username,
+            text: input.value
+        });
+        input.value = "";
+    }
+</script>
+
+</body>
+</html>
