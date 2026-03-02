@@ -65,7 +65,6 @@ def on_join(data):
         "username": "System",
         "text": f"{username} a rejoint le salon",
         "room": room
-        room=room
         }),
 
 @socketio.on("send_message")
