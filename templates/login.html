@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0;
-            height: 100vh;
+            height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,8 +17,8 @@
 
         .card {
             background: white;
-            padding: 40px;
-            width: 300px;
+            padding: 30px;
+            width: 320px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             text-align: center;
@@ -26,14 +26,14 @@
         }
 
         h2 {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #ff003c;
         }
 
         input {
             width: 100%;
             padding: 10px;
-            margin: 8px 0;
+            margin: 6px 0;
             border-radius: 10px;
             border: 1px solid #ddd;
             outline: none;
@@ -41,6 +41,10 @@
 
         input:focus {
             border: 1px solid #ff4e8b;
+        }
+
+        input[type="file"] {
+            border: none;
         }
 
         button {
@@ -53,17 +57,27 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-            transition: 0.3s;
         }
 
         button:hover {
-            opacity: 0.85;
+            opacity: 0.9;
         }
 
         .divider {
-            margin: 20px 0;
-            font-size: 14px;
+            margin: 15px 0;
+            font-size: 13px;
             color: gray;
+        }
+
+        .preview {
+            margin-top: 10px;
+        }
+
+        .preview img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         @keyframes fadeIn {
@@ -85,15 +99,31 @@
         <button type="submit">Se connecter</button>
     </form>
 
-    <div class="divider">ou</div>
+    <div class="divider">ou créer un compte</div>
 
-    <form action="/register" method="POST">
+    <form action="/register" method="POST" enctype="multipart/form-data">
         <input name="username" placeholder="Nom" required>
         <input type="password" name="password" placeholder="Mot de passe" required>
+        <input type="file" name="profile_pic" accept="image/*" onchange="previewImage(event)">
+        <div class="preview" id="preview"></div>
         <button type="submit">Créer un compte</button>
     </form>
 
 </div>
+
+<script>
+function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+        const output = document.createElement('img');
+        output.src = reader.result;
+        const preview = document.getElementById('preview');
+        preview.innerHTML = "";
+        preview.appendChild(output);
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+</script>
 
 </body>
 </html>

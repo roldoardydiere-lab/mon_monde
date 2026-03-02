@@ -1,61 +1,73 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Chat</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-</head>
-<body>
-
-<div class="chat-container">
-
-    <div class="header">
-        💬 Chat – {{ username }}
-    </div>
-
-    <div class="messages" id="messages">
-        {% for msg in messages %}
-        <div class="message {% if msg.username == username %}me{% else %}other{% endif %}">
-            <div class="username">{{ msg.username }}</div>
-            {{ msg.text }}
-        </div>
-        {% endfor %}
-    </div>
-
-    <div class="input-area">
-        <input id="message" placeholder="Écris un message">
-        <button onclick="sendMessage()">➤</button>
-    </div>
-
-</div>
-
 <script>
-    const socket = io();
-    const username = "{{ username }}";
+const socket = io();
+const username = "{{ username }}";
 
-    socket.on("receive_message", function(msg) {
-        const div = document.createElement("div");
-        div.className = "message " + (msg.username === username ? "me" : "other");
+function getCurrentTime() {
+    const now = new Date();
+    return now.getHours().toString().padStart(2, '0') + ":" +
+           now.getMinutes().toString().padStart(2, '0');
+}
 
-        const name = document.createElement("div");
-        name.className = "username";
-        name.textContent = msg.username;
+function addMessage(msg) {
+    const box = document.getElementById("messages");
 
-        div.appendChild(name);
-        div.appendChild(document.createTextNode(msg.text));
+    const div = document.createElement("div");
+    div.className = "message " + (msg.username === username ? "right" : "left");
 
-        document.getElementById("messages").appendChild(div);
+    const name = document.createElement("div");
+    name.className = "username";
+    name.textContent = msg.username;
+
+    const text = document.createElement("div");
+    text.className = "text";
+    text.textContent = msg.text;
+
+    const time = document.createElement("div");
+    time.className = "time";
+    time.textContent = getCurrentTime();
+
+    div.appendChild(name);
+    div.appendChild(text);
+    div.appendChild(time);
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+socket.on("receive_message", function(msg) {
+    addMessage(msg);
+
+    if(msg.username !== username){
+        socket.emit("message_seen", { username: msg.username });
+    }
+});
+
+socket.on("message_seen", function(data) {
+    if(data.username === username){
+        const messages = document.querySelectorAll(".message.right");
+        if(messages.length > 0){
+            const last = messages[messages.length - 1];
+
+            if(!last.querySelector(".seen")){
+                const seen = document.createElement("div");
+                seen.className = "seen";
+                seen.textContent = "✔✔ vu";
+                last.appendChild(seen);
+            }
+        }
+    }
+});
+
+function sendMessage() {
+    const input = document.getElementById("message");
+
+    if(input.value.trim() === "") return;
+
+    socket.emit("send_message", {
+        username: username,
+        text: input.value
     });
 
-    function sendMessage() {
-        const input = document.getElementById("message");
-        socket.emit("send_message", {
-            username: username,
-            text: input.value
-        });
-        input.value = "";
-    }
+    input.value = "";
+}
 </script>
-
-</body>
-</html>
