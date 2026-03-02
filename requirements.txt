@@ -1,4 +1,6 @@
 flask
 gunicorn
 flask-socketio
+Flask-SQLALchemy
 eventlet
+Werkzeug
