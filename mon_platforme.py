@@ -11,6 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -65,7 +66,9 @@ def on_join(data):
         "username": "System",
         "text": f"{username} a rejoint le salon",
         "room": room
-    }),
+        },
+        room=room
+    )
 
 @socketio.on("send_message")
 def handle_message(data):
